@@ -18,25 +18,32 @@ def parseStacks(lines : Iterator[String], numberOfStacks : Int) : IndexedSeq[Arr
             stacks(stack).append(line.substring(pos, pos + 1))
     stacks
 
-def performMove(fromStack : ArrayDeque[String], toStack : ArrayDeque[String], num : Int) =
-    for 
-        _ <- 1 to num 
-    do 
-        toStack.prepend(fromStack.removeHead())
+def performMove(fromStack : ArrayDeque[String], toStack : ArrayDeque[String], num : Int, movetype : Int) =
+    if 
+        movetype == 1 
+    then
+        for 
+            _ <- 1 to num 
+        do 
+            toStack.prepend(fromStack.removeHead())
+    else 
+        val toMove = for _ <- 1 to num yield fromStack.removeHead()
+        toStack.prependAll(toMove)
 
 @main def Run(args: String*) =
     val (lines1, lines2) = fromFile(args(0)).getLines().duplicate
 
+    
     var stacks = parseStacks(lines1, args(1).toInt - 1)
     
     val move_regex : Regex = """move (\d*) from (\d*) to (\d*)""".r 
-
+    
     for 
         line <- lines2
         if line.startsWith("move")
     do
         line match
-            case move_regex(num, from, to) => performMove(stacks(from.toInt - 1), stacks(to.toInt - 1), num.toInt)
+            case move_regex(num, from, to) => performMove(stacks(from.toInt - 1), stacks(to.toInt - 1), num.toInt, args(2).toInt)
             case _ => println("Faulty line")
 
     for stack <- stacks do print(stack.head)
