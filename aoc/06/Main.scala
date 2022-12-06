@@ -1,25 +1,22 @@
 import scala.io.Source._
 
-@main def Run(args: String*) =
-    val lines = fromFile(args(0)).getLines()
-    
+def getMarker(input : String, uniques : Int) : Int =
     var score = -1
-    var score2 = -1
-
-    val input = lines.next()
     for 
-        i <- 0 to input.length() - 4
-        if input.substring(i, i + 4).distinct.length() == 4 
+        i <- 0 to input.length() - uniques
+        if input.substring(i, i + uniques).distinct.length() == uniques
         if score < 0
     do
-        score = i + 4
+        score = i + uniques
+    return score
 
-    for 
-        i <- 0 to input.length() - 14
-        if input.substring(i, i + 14).distinct.length() == 14
-        if score2 < 0
-    do
-        score2 = i + 14
+@main def Run(args: String*) =
+    val lines = fromFile(args(0)).getLines()
+
+    val input = lines.next()
+
+    val score = getMarker(input, 4)
+    val score2 = getMarker(input, 14)
 
     println(s"Part 1: $score")
     println(s"Part 2: $score2")
