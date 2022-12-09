@@ -1,8 +1,10 @@
 # Other
 .vscode
+*input.txt
 
 # Scala
 .metals
+.bsp
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
