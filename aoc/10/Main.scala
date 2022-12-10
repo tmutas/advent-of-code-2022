@@ -27,6 +27,18 @@ import scala.math
 
     val scores = (for i <- score_cycles yield signals(i - 1)*i)
 
-    println(scores)
-
     println(s"Part 1: ${scores.sum}")
+
+    // Part 2
+
+    val output_lines = for i <- 0 until 6 yield StringBuilder()
+
+    for 
+        i <- 0 until 6
+        j <- 0 until 40
+    do
+        val curpos = signals(j+i*40)
+        val positions = Set(curpos - 1, curpos, curpos + 1)
+        output_lines(i) += (if positions.contains(j) then '#' else '.')
+    
+    for line <- output_lines do println(line)
