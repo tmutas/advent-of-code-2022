@@ -34,17 +34,15 @@ class Monkey(
         + s""" divisible by $testDivisibleBy, to $monkeyIndexIfTrue or $monkeyIndexifFalse"""
         
 class Monkeys(val monkeys : IndexedSeq[Monkey]):
-    val gcd = monkeys.map(_.testDivisibleBy)
+    val gcd = monkeys.map(_.testDivisibleBy).toSet.product
+
     def doRound() = monkeys.foreach(doMonkeyTurn)
 
     def doMonkeyTurn(mon : Monkey) = 
         val throws = mon.doTurn()
         for t <- throws do t match
-            case (toMonkey, value) => monkeys(toMonkey).items += value
+            case (toMonkey, value) => monkeys(toMonkey).items += value % gcd
 
-
-def gcd(li : IndexedSeq[Long]) : Int = 
-    return 5
 
 def parseMonkey(it : Seq[String], divideLevel : Boolean = true) : Monkey = 
     val itemsPattern = """  Starting items: (.*)""".r
@@ -108,7 +106,7 @@ def parseMonkey(it : Seq[String], divideLevel : Boolean = true) : Monkey =
     println("Initial State:")
     monkeys2.monkeys.foreach(println)
 
-    for i <- 1 to 20 do monkeys2.doRound()
+    for i <- 1 to 10000 do monkeys2.doRound()
 
     println("End state:")
     monkeys2.monkeys.foreach(println)
