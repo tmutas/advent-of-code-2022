@@ -13,9 +13,12 @@ class Monkey(
     val monkeyIndexifFalse : Int
 ):
 
+    var itemsInspected = 0
+
     def doTurn() : IndexedSeq[(Int, Int)] = items.removeAll().map(inspectItem).toIndexedSeq
 
     def inspectItem(i : Int) : (Int, Int) =
+        itemsInspected += 1
         var value = performOperation(i)
         value /= 3
         val toMonkey = if value % testDivisibleBy == 0 then monkeyIndexIfTrue else monkeyIndexifFalse
@@ -26,7 +29,7 @@ class Monkey(
             case "+" => i + opValue
             case "**" => i * i
 
-    override def toString() = s"""Items: $items, performs ($opType, $opValue)"""
+    override def toString() = s"""Items: $items, done $itemsInspected inspections, performs ($opType, $opValue)"""
         + s""" divisible by $testDivisibleBy, to $monkeyIndexIfTrue or $monkeyIndexifFalse"""
         
 class Monkeys(val monkeys : IndexedSeq[Monkey]):
@@ -35,7 +38,7 @@ class Monkeys(val monkeys : IndexedSeq[Monkey]):
     def doMonkeyTurn(mon : Monkey) = 
         val throws = mon.doTurn()
         for t <- throws do t match
-            case (toMonkey, value) => monkeys(toMonkey).items.append(value)
+            case (toMonkey, value) => monkeys(toMonkey).items += value
         
 
 def parseMonkey(it : Seq[String]) : Monkey = 
@@ -77,5 +80,14 @@ def parseMonkey(it : Seq[String]) : Monkey =
     
     val monkeys = Monkeys(lines.grouped(7).map(parseMonkey).toIndexedSeq)
 
+    println("Initial State:")
     monkeys.monkeys.foreach(println)
 
+    for i <- 1 to 20 do monkeys.doRound()
+
+    println("End state:")
+    monkeys.monkeys.foreach(println)
+
+    val top2 = monkeys.monkeys.map(_.itemsInspected).sorted.takeRight(2)
+    
+    println(s"PART 1 SCORE: ${top2} with product ${top2.product}")
