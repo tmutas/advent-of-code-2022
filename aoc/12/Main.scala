@@ -33,8 +33,11 @@ import scala.math
 
     println(s"($sx, $sy) ($ex, $ey)")
 
-    def explore(i : Int, j : Int, preDist : Int) : Int = 
-        val curDist = preDist + 1
+    var exploreStack = mutable.Stack[(Int, Int)]((sx, sy))
+        
+    def explore(point : (Int, Int)) = 
+        val (i, j) = point
+        val curDist = distMap(i)(j) + 1
         val maxClimbHeight = heightMap(i)(j) + 1
         if 
             !(i == ex && j == ey) 
@@ -43,16 +46,15 @@ import scala.math
                 (in, jn) <- Vector((i-1, j), (i+1, j), (i, j-1), (i, j+1))
                 if in >= 0 && in < xm && jn >= 0 && jn < ym
                 if distMap(in)(jn) > curDist
-                if distMap(in)(jn) == defaultDist
                 if heightMap(in)(jn) <= maxClimbHeight
             do
                 distMap(in)(jn) = curDist
-                explore(in, jn, curDist)
-            return 0
-        else
-            return 0
+                exploreStack.push((in, jn))
 
-    val res = explore(sx, sy, 0)
+    while 
+        !exploreStack.isEmpty
+    do 
+        explore(exploreStack.pop())
 
     heightMap.foreach(println)
     distMap.foreach(println)
