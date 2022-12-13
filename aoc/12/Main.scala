@@ -13,11 +13,6 @@ import scala.math
     
     val xm = tempheightMap.length
     val ym = tempheightMap(0).length
-    
-    // Stores the shortest distance to the point
-    // Set to value longer than any distance
-    val defaultDist = xm*ym
-    val distMap = mutable.ArrayBuffer.fill(xm, ym)(defaultDist)
 
     val ex = tempheightMap.indexWhere(_.contains(endVal))
     val ey = tempheightMap(ex).indexWhere(_ == endVal)
@@ -29,34 +24,52 @@ import scala.math
     val temp2heightMap = tempheightMap.updated(sx, tempheightMap(sx).updated(sy, Char.char2int('z')))
     val heightMap = temp2heightMap.updated(ex, temp2heightMap(ex).updated(ey, Char.char2int('z')))
 
-    distMap(sx)(sy) = 0
+    def findPath(sx : Int, sy : Int) :  scala.collection.mutable.ArrayBuffer[scala.collection.mutable.ArrayBuffer[Int]] =
+        // Stores the shortest distance to the point
+        // Set to value longer than any distance
+        val defaultDist = xm*ym
+        val distMap = mutable.ArrayBuffer.fill(xm, ym)(defaultDist)
+        distMap(sx)(sy) = 0
 
-    println(s"($sx, $sy) ($ex, $ey)")
+        var exploreStack = mutable.Stack[(Int, Int)]((sx, sy))
+            
+        def explore(point : (Int, Int)) = 
+            val (i, j) = point
+            val curDist = distMap(i)(j) + 1
+            val maxClimbHeight = heightMap(i)(j) + 1
+            if 
+                !(i == ex && j == ey) 
+            then
+                for 
+                    (in, jn) <- Vector((i-1, j), (i+1, j), (i, j-1), (i, j+1))
+                    if in >= 0 && in < xm && jn >= 0 && jn < ym
+                    if distMap(in)(jn) > curDist
+                    if heightMap(in)(jn) <= maxClimbHeight
+                do
+                    distMap(in)(jn) = curDist
+                    exploreStack.push((in, jn))
 
-    var exploreStack = mutable.Stack[(Int, Int)]((sx, sy))
-        
-    def explore(point : (Int, Int)) = 
-        val (i, j) = point
-        val curDist = distMap(i)(j) + 1
-        val maxClimbHeight = heightMap(i)(j) + 1
-        if 
-            !(i == ex && j == ey) 
-        then
-            for 
-                (in, jn) <- Vector((i-1, j), (i+1, j), (i, j-1), (i, j+1))
-                if in >= 0 && in < xm && jn >= 0 && jn < ym
-                if distMap(in)(jn) > curDist
-                if heightMap(in)(jn) <= maxClimbHeight
-            do
-                distMap(in)(jn) = curDist
-                exploreStack.push((in, jn))
+        while 
+            !exploreStack.isEmpty
+        do 
+            explore(exploreStack.pop())
 
-    while 
-        !exploreStack.isEmpty
-    do 
-        explore(exploreStack.pop())
+        return distMap
 
-    heightMap.foreach(println)
-    distMap.foreach(println)
+    val part1distMap = findPath(sx, sy)
+    println(s"Part 1: From ($sx, $sy) distance ${part1distMap(ex)(ey)} at ($ex, $ey)")
+    println("=======================")
+    // ==================
+    // PART 2
 
-    println(s"Part 1: ${distMap(ex)(ey)} at ($ex, $ey)")
+    val alldists = 
+    for 
+        i <- 0 until xm
+        j <- 0 until ym
+        if heightMap(i)(j) == Char.char2int('a')
+    yield
+        findPath(i, j)(ex)(ey)
+    
+    println(s"Part 2: All Distances from a: ${alldists} at ($ex, $ey)")
+    println(s"Part 2: Minimal distance is ${alldists.min}")
+
