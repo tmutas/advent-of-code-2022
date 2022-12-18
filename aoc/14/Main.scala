@@ -19,24 +19,23 @@ def applyPath(rocks : DenseMatrix[Double], fromPoint : Vector[Int], toPoint : Ve
     else
         rocks(fromPoint(0) to toPoint(0) by diff(0).sign, fromPoint(1)) := 1.0
 
-def fallSand(rocks : DenseMatrix[Double], x : Int = 500, y : Int = 0) : (Int, Int) =
-    if y == rocks.cols-1 then return (x, y)
+def fallSand(rocks : DenseMatrix[Double], max : Int, x : Int = 500, y : Int = 0) : (Int, Int) =
+    if y == max then return (x, y)
     
     if rocks(x, y + 1) == 0.0
     then 
         //rocks(x, y + 1) = 0.5
-        return fallSand(rocks, x, y + 1)
+        return fallSand(rocks, max, x, y + 1)
     else if rocks(x - 1, y + 1) == 0.0
     then
         //rocks(x - 1, y + 1) = 0.5
-        return fallSand(rocks, x - 1, y + 1)
+        return fallSand(rocks, max, x - 1, y + 1)
     else if rocks(x + 1, y + 1) == 0.0
     then
         //rocks(x + 1, y + 1) = 0.5
-        return fallSand(rocks, x + 1, y + 1)
+        return fallSand(rocks, max, x + 1, y + 1)
     else
         return (x, y)
-
 
 @main def Run(args: String*) =
     val inputlines : Iterator[String] = 
@@ -46,16 +45,25 @@ def fallSand(rocks : DenseMatrix[Double], x : Int = 500, y : Int = 0) : (Int, In
 
     val rockPaths = parseLines(inputlines)
 
+    var rockDepths = mutable.ArrayBuffer[Int]()
+
     for 
         line <- rockPaths 
     do 
-        for i <- 0 until line.length - 1 do applyPath(rocks, line(i), line(i + 1))
-    
+        for i <- 0 until line.length - 1 
+        do 
+            applyPath(rocks, line(i), line(i + 1))
+            rockDepths += line(i)(1)
+            rockDepths += line(i + 1)(1)
+
+    var rocks2 = rocks.copy
+
+    // Part 1
     var end = false
     var score1 = 0
     while !end
     do
-        var (x, y) = fallSand(rocks)
+        var (x, y) = fallSand(rocks, rocks.cols - 1)
         if y == rocks.cols - 1
         then end = true 
         else 
@@ -65,3 +73,17 @@ def fallSand(rocks : DenseMatrix[Double], x : Int = 500, y : Int = 0) : (Int, In
     val f1 = Figure()
     f1.subplot(0) += image(rocks(400 until 600, 199 until 0 by -1).t)
     f1.saveas("rocks.png")
+
+    // Part 2
+
+    var score2 = 0
+    while rocks2(500, 0) == 0
+    do
+        var (x, y) = fallSand(rocks2, rockDepths.max + 1)
+        score2 = score2 + 1
+        rocks2(x, y) = 0.5
+
+    println(s"Part 2: $score2")
+    val f2 = Figure()
+    f2.subplot(0) += image(rocks2(400 until 600, rockDepths.max until 0 by -1).t)
+    f2.saveas("rocks2.png")
